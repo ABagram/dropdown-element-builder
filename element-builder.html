@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Dropdown Builder</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+  <style>
+    * {
+      font-family: 'Inter', sans-serif;
+    }
+
+    :root {
+      --primary: #111;
+      --background: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --radius: 8px;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      background: var(--background);
+      color: var(--primary);
+    }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .builder-panel {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 24px;
+      border: 1px solid var(--border);
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+
+    .options-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 500px;
+    }
+
+    .options-table th,
+    .options-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+    }
+
+    .column-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .table-input {
+      width: calc(100% - 16px);
+      /* Adjust width to fit within the cell padding */
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      box-sizing: border-box;
+      /* Ensure padding and border are included in the element's total width and height */
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      background: var(--primary);
+      color: white;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.2s;
+    }
+
+    input, select {
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .dropdown-preview {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      margin: 24px 0;
+    }
+
+    .dropdown-button {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      width: 100%;
+      margin-top: 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      max-height: 300px;
+      overflow-y: auto;
+      display: none;
+      z-index: 1000;
+    }
+
+    .dropdown-group {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .group-header {
+      padding: 8px 16px;
+      font-weight: 600;
+      background: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .group-header input {
+      border: none;
+      background: transparent;
+      font-weight: 600;
+      font-family: inherit;
+      flex: 1;
+    }
+
+    .dropdown-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .dropdown-item:hover {
+      background: #f8fafc;
+    }
+
+    .item-primary {
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .item-primary b {
+      font-weight: 600;
+    }
+
+    .item-secondary {
+      font-size: 12px;
+      color: #64748b;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .code-preview {
+      background: var(--background);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      position: relative;
+      word-wrap: normal;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 12px;
+      }
+
+      .builder-panel {
+        padding: 16px;
+      }
+
+      .btn {
+        padding: 6px 12px;
+        font-size: 14px;
+      }
+    }
+
+    #group-names-container {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      background: var(--surface);
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .layout-container {
+      display: flex;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .layout-column {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      background: var(--surface);
+      min-height: 200px;
+    }
+
+    .layout-item {
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--background);
+      margin-bottom: 8px;
+      cursor: grab;
+      flex: 1 1 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .drag-handle {
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .layout-builder {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      background: var(--surface);
+      min-height: 200px;
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .layout-item.selected {
+      font-weight: bold;
+    }
+
+    .layout-item .subtitle {
+      font-size: 12px;
+      background-color: var(--primary);
+      padding: 8px;
+      margin-left: 10px;
+      color: var(--surface);
+      border-radius: var(--radius);
+      font-weight: normal;
+    }
+
+    .formatting-buttons {
+      display: flex;
+      gap: 4px;
+    }
+
+    .formatting-buttons button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: #1e293b;
+    }
+
+    .formatting-buttons button.active {
+      color: var(--primary);
+    }
+
+    .options-table tr th {
+      border-top: 1px solid var(--border);
+    }
+
+    .options-table th:first-child,
+    .options-table td:first-child {
+      text-align: center;
+      background: var(--background);
+      font-weight: bold;
+      font-size: 12px;
+      /* Adjust font size to match the majority of the text */
+      border-left: 1px solid var(--border);
+    }
+
+    .options-table tr:first-child th:first-child {
+      border-top-left-radius: var(--radius);
+    }
+
+    .options-table tr:first-child th:last-child {
+      border-top-right-radius: var(--radius);
+    }
+
+    .options-table tr:last-child td:first-child {
+      border-bottom-left-radius: var(--radius);
+    }
+
+    .options-table tr:last-child td:last-child {
+      border-bottom-right-radius: var(--radius);
+    }
+
+    .layout-item.dragging {
+      opacity: 0.5;
+      background: #e2e8f0;
+    }
+
+    .layout-item.ghost {
+      opacity: 0.3;
+    }
+
+    .layout-item.hovered {
+      width: 80%;
+      transition: width 0.2s;
+    }
+
+    .layout-item.placeholder {
+      background: #e2e8f0;
+      border: 2px dashed #ccc;
+      width: 100%;
+      height: 40px;
+      margin-bottom: 8px;
+    }
+
+    .layout-builder {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .drop-indicator {
+      position: absolute;
+      background: var(--primary);
+      transition: all 0.2s;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    .drop-indicator.left {
+      width: 4px;
+      height: 100%;
+      left: -2px;
+    }
+
+    .drop-indicator.right {
+      width: 4px;
+      height: 100%;
+      right: -2px;
+    }
+
+    .drop-indicator.top {
+      width: 100%;
+      height: 4px;
+      top: -2px;
+    }
+
+    .drop-indicator.bottom {
+      width: 100%;
+      height: 4px;
+      bottom: -2px;
+    }
+
+    .layout-item {
+      position: relative;
+      width: 100%;
+      transition: transform 0.2s;
+    }
+
+    .layout-item.dragging {
+      z-index: 1000;
+      cursor: grabbing;
+    }
+
+    .layout-item.drop-left {
+      transform: translateX(20px);
+    }
+
+    .layout-item.drop-right {
+      transform: translateX(-20px);
+    }
+
+    .layout-item.drop-top {
+      transform: translateY(20px);
+    }
+
+    .layout-item.drop-bottom {
+      transform: translateY(-20px);
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .overlay-content {
+      background: var(--surface);
+      padding: 24px;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .overlay-content h3 {
+      margin-top: 0;
+    }
+
+    .overlay-content .formatting-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .overlay-content .formatting-buttons button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: #1e293b;
+    }
+
+    .overlay-content .formatting-buttons button.active {
+      color: var(--primary);
+    }
+
+    .tooltip {
+      padding: 8px;
+      display: grid;
+      grid-template-columns: repeat(4, auto);
+      gap: 4px;
+      align-items: center;
+    }
+
+    .tooltip input[type="color"] {
+      width: 24px;
+      height: 24px;
+      padding: 0;
+    }
+
+    .tooltip .formatting-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tooltip .formatting-buttons button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: #1e293b;
+    }
+
+    .tooltip .formatting-buttons button.active {
+      color: var(--primary);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Builder Section -->
+    <div class="builder-panel">
+      <h2>Dropdown Builder</h2>
+
+      <div class="table-container">
+        <table class="options-table" id="options-table">
+          <thead id="table-header"></thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-top: 16px;">
+        <button class="btn" onclick="addColumn()">
+          <i class="bx bx-plus"></i> Add Column
+        </button>
+        <button class="btn" onclick="addRow()">
+          <i class="bx bx-plus"></i> Add Row
+        </button>
+        <button class="btn" onclick="addGroup()">
+          <i class="bx bx-category"></i> Add Group
+        </button>
+      </div>
+
+      <div style="margin-top: 24px;">
+        <label>Display Column: </label>
+        <select id="display-column" style="margin-left: 8px" onchange="updatePreview()">
+          <option value="0">Column 1</option>
+        </select>
+      </div>
+
+      <div id="group-names-container">
+        <h3>Group Names</h3>
+        <div id="group-names"></div>
+      </div>
+    </div>
+
+    <!-- Preview Section -->
+    <div class="builder-panel">
+      <h2>Preview</h2>
+      <div class="dropdown-preview">
+        <div class="dropdown-button" id="preview-button">
+          <span>Select an option</span>
+          <i class="bx bx-chevron-down"></i>
+        </div>
+        <div class="dropdown-menu" id="preview-menu"></div>
+      </div>
+
+      <h2>Generated Code</h2>
+      <div class="code-preview">
+        <button class="btn" id="copy-button" onclick="copyCode()" style="position: absolute; top: 12px; right: 12px;">
+          <i class="bx bx-copy"></i> Copy
+        </button>
+        <pre><code class="language-html" id="generated-code"></code></pre>
+
+        <script>
+          let columns = [{ id: 0, name: 'Column 1', visible: true }];
+          let rows = [{ values: columns.map(() => ''), groupId: null }]; // Add default row 1
+          let groups = [];
+          let displayColumnIndex = 0;
+
+          function addColumn() {
+            const newId = columns.length;
+            columns.push({ id: newId, name: `Column ${newId + 1}`, visible: true });
+            // Add empty value for new column in all rows
+            rows.forEach(row => row.values.push(''));
+            renderTable();
+            updateDisplayColumnOptions();
+            updatePreview();
+          }
+
+          function addGroup() {
+            const groupId = groups.length + 1;
+            groups.push({
+              id: groupId,
+              name: `Group ${groupId}`,
+              rows: []
+            });
+            renderTable();
+            updateGroupNames();
+            updatePreview();
+          }
+
+          function deleteColumn(columnId) {
+            columns = columns.filter(col => col.id !== columnId);
+            rows.forEach(row => {
+              row.values = row.values.filter((_, index) => index !== columnId);
+            });
+            renderTable();
+            updateDisplayColumnOptions();
+            updatePreview();
+          }
+
+          function addRow() {
+            rows.push({
+              values: columns.map(() => ''), // Initialize with correct number of columns
+              groupId: null
+            });
+            renderTable();
+            updatePreview();
+          }
+
+          function updateDisplayColumnOptions() {
+            const select = document.getElementById('display-column');
+            select.innerHTML = columns
+              .map((col, index) => `<option value="${index}">${col.name}</option>`)
+              .join('');
+          }
+
+          function updateColumnName(columnId, newName) {
+            columns.find(col => col.id === columnId).name = newName;
+            updateDisplayColumnOptions();
+            updatePreview();
+          }
+
+          function updateCell(rowIndex, colIndex, value) {
+            rows[rowIndex].values[colIndex] = value;
+            updatePreview();
+          }
+
+          function updateGroup(rowIndex, groupId) {
+            rows[rowIndex].groupId = groupId ? parseInt(groupId) : null;
+            updatePreview();
+          }
+          function renderTable() {
+            const header = document.getElementById('table-header');
+            const body = document.getElementById('table-body');
+
+            // Render headers
+            header.innerHTML = `
+              <th>#</th>
+              ${columns.map((col, index) => `
+                <th>
+                  <div class="column-header">
+                    <input class="table-input" value="${col.name}" 
+                           onchange="updateColumnName(${col.id}, this.value)">
+                    <button class="btn" onclick="showTooltip(event, ${col.id})" 
+                            style="background: none; padding: 4px 8px">
+                      <i class="bx bx-edit"></i>
+                    </button>
+                    <button class="btn" onclick="deleteColumn(${col.id})" 
+                            style="color: #ef4444; background: none; padding: 4px 8px">
+                      <i class="bx bx-x"></i>
+                    </button>
+                  </div>
+                </th>
+              `).join('')}
+              <th>Group</th><th>Actions</th>`;
+
+            // Render body
+            body.innerHTML = rows.map((row, rowIndex) => `
+              <tr>
+                <td>${rowIndex + 1}</td>
+                ${columns.map((col, colIndex) => `
+                  <td>
+                    <input class="table-input" 
+                           value="${row.values[colIndex] || ''}" 
+                           onchange="updateCell(${rowIndex}, ${colIndex}, this.value)">
+                  </td>
+                `).join('')}
+                <td>
+                  <select onchange="updateGroup(${rowIndex}, this.value)">
+                    <option value="">No Group</option>
+                    ${groups.map(group => `
+                      <option value="${group.id}" ${row.groupId === group.id ? 'selected' : ''}>
+                        ${group.name}
+                      </option>
+                    `).join('')}
+                  </select>
+                </td>
+                <td>
+                  <button class="btn" onclick="deleteRow(${rowIndex})" 
+                          style="background: none; color: #ef4444; padding: 8px">
+                    <i class="bx bx-trash-alt"></i>
+                  </button>
+                </td>
+              </tr>
+            `).join('');
+          }
+
+          function deleteRow(rowIndex) {
+            rows.splice(rowIndex, 1);
+            renderTable();
+            updatePreview();
+          }
+          function updatePreview() {
+            displayColumnIndex = parseInt(document.getElementById('display-column').value);
+            const menu = document.getElementById('preview-menu');
+
+            // Group rows by their groupId
+            const groupedRows = {};
+            rows.forEach((row, index) => {
+              const groupId = row.groupId || 'ungrouped';
+              if (!groupedRows[groupId]) {
+                groupedRows[groupId] = [];
+              }
+              groupedRows[groupId].push(row);
+            });
+
+            // Render grouped dropdown items
+            menu.innerHTML = Object.entries(groupedRows).map(([groupId, rows]) => {
+              const group = groups.find(g => g.id == groupId) || { name: '' };
+              return `
+                <div class="dropdown-group">
+                  ${groupId !== 'ungrouped' ? `
+                    <div class="group-header">
+                      ${group.name}
+                    </div>
+                  ` : ''}
+                  ${rows.map(row => {
+                const primaryText = row.values[displayColumnIndex] || '';
+                let itemStyle = '';
+                const colIndex = columns.findIndex(col => col.id === displayColumnIndex);
+                if (columns[colIndex].bold) itemStyle += 'font-weight: bold;';
+                if (columns[colIndex].italic) itemStyle += 'font-style: italic;';
+                if (columns[colIndex].underline) itemStyle += 'text-decoration: underline;';
+                if (columns[colIndex].textAlign) itemStyle += `text-align: ${columns[colIndex].textAlign};`;
+
+                return `
+                      <div class="dropdown-item" onclick="selectItem('${primaryText}')">
+                        <div class="item-primary" style="${itemStyle}"><b>${primaryText}</b></div>
+                      </div>
+                    `;
+              }).join('')}
+                </div>
+              `;
+            }).join('');
+
+            generateCode();
+          }
+
+          function selectItem(value) {
+            document.getElementById('preview-button').querySelector('span').textContent = value;
+            document.getElementById('preview-menu').style.display = 'none';
+          }
+
+          function generateCode() {
+            displayColumnIndex = parseInt(document.getElementById('display-column').value);
+            const code = `
+        <div class="dropdown-preview">
+          <div class="dropdown-button" onclick="toggleDropdownMenu()">
+            <span>Select an option</span>
+            <i class="bx bx-chevron-down"></i>
+          </div>
+          <div class="dropdown-menu">
+            ${Object.entries(rows.reduce((acc, row) => {
+              const groupId = row.groupId || 'ungrouped';
+              if (!acc[groupId]) acc[groupId] = [];
+              acc[groupId].push(row);
+              return acc;
+            }, {})).map(([groupId, rows]) => {
+              const group = groups.find(g => g.id == groupId) || { name: '' };
+              return `
+                <div class="dropdown-group">
+                  ${groupId !== 'ungrouped' ? `
+                    <div class="group-header">${group.name}</div>
+                  ` : ''}
+                  ${rows.map(row => {
+                const primary = row.values[displayColumnIndex];
+                let itemStyle = '';
+                const colIndex = columns.findIndex(col => col.id === displayColumnIndex);
+                if (columns[colIndex].bold) itemStyle += 'font-weight: bold;';
+                if (columns[colIndex].italic) itemStyle += 'font-style: italic;';
+                if (columns[colIndex].underline) itemStyle += 'text-decoration: underline;';
+                if (columns[colIndex].textAlign) itemStyle += `text-align: ${columns[colIndex].textAlign};`;
+
+                return `
+                      <div class="dropdown-item" onclick="selectItem('${primary}')" style="${itemStyle}">
+                        <div class="item-primary"><b>${primary}</b></div>
+                      </div>`;
+              }).join('')}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+        
+        <style>
+        .dropdown-preview {
+          position: relative;
+          width: 100%;
+          max-width: 400px;
+        }
+        
+        .dropdown-button {
+          padding: 12px 16px;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          background: white;
+          cursor: pointer;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        
+        .dropdown-menu {
+          position: absolute;
+          width: 100%;
+          margin-top: 8px;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          background: white;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .dropdown-group {
+          padding: 8px 0;
+          border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .group-header {
+          padding: 8px 16px;
+          font-weight: 600;
+          background: #f8fafc;
+        }
+        
+        .dropdown-item {
+          padding: 12px 16px;
+          cursor: pointer;
+          transition: background 0.2s;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        
+        .item-primary {
+          font-weight: 500;
+          font-size: 14px;
+        }
+        
+        .item-primary b {
+          font-weight: 600;
+        }
+        </style>
+            `;
+
+            document.getElementById('generated-code').textContent = code.trim();
+            Prism.highlightAll();
+          }
+
+          function showTooltip(event, columnId) {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.style.display = 'block';
+            tooltip.style.top = `${event.clientY + 10}px`;
+            tooltip.style.left = `${event.clientX + 10}px`;
+            tooltip.setAttribute('data-column-id', columnId);
+          }
+
+          function hideTooltip() {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.style.display = 'none';
+          }
+
+          function toggleBold() {
+            const columnId = document.getElementById('tooltip').getAttribute('data-column-id');
+            columns[columnId].bold = !columns[columnId].bold;
+            updatePreview();
+          }
+
+          function toggleItalic() {
+            const columnId = document.getElementById('tooltip').getAttribute('data-column-id');
+            columns[columnId].italic = !columns[columnId].italic;
+            updatePreview();
+          }
+
+          function toggleUnderline() {
+            const columnId = document.getElementById('tooltip').getAttribute('data-column-id');
+            columns[columnId].underline = !columns[columnId].underline;
+            updatePreview();
+          }
+
+          function alignLeft() {
+            const columnId = document.getElementById('tooltip').getAttribute('data-column-id');
+            columns[columnId].textAlign = 'left';
+            updatePreview();
+          }
+
+          function alignCenter() {
+            const columnId = document.getElementById('tooltip').getAttribute('data-column-id');
+            columns[columnId].textAlign = 'center';
+            updatePreview();
+          }
+
+          function alignRight() {
+            const columnId = document.getElementById('tooltip').getAttribute('data-column-id');
+            columns[columnId].textAlign = 'right';
+            updatePreview();
+          }
+
+          function increaseFontSize() {
+            const columnId = document.getElementById('tooltip').getAttribute('data-column-id');
+            columns[columnId].fontSize = (columns[columnId].fontSize || 14) + 1;
+            updatePreview();
+          }
+
+          function decreaseFontSize() {
+            const columnId = document.getElementById('tooltip').getAttribute('data-column-id');
+            columns[columnId].fontSize = (columns[columnId].fontSize || 14) - 1;
+            updatePreview();
+          }
+
+          function changeFontColor(color) {
+            const columnId = document.getElementById('tooltip').getAttribute('data-column-id');
+            columns[columnId].color = color;
+            updatePreview();
+          }
+
+          function copyCode() {
+            navigator.clipboard.writeText(document.getElementById('generated-code').textContent).then(() => {
+              const copyButton = document.getElementById('copy-button');
+              copyButton.innerHTML = '<i class="bx bx-check"></i> Copied';
+              setTimeout(() => {
+                copyButton.innerHTML = '<i class="bx bx-copy"></i> Copy';
+              }, 2000);
+            });
+          }
+
+          // Initialize
+          document.addEventListener('DOMContentLoaded', () => {
+            renderTable();
+            updateGroupNames();
+            updatePreview();
+          });
+
+          // Dropdown interaction
+          document.getElementById('preview-button').addEventListener('click', () => {
+            const menu = document.getElementById('preview-menu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+          });
+
+          function toggleDropdownMenu() {
+            const menu = document.querySelector('.dropdown-menu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+          }
+
+          function updateGroupNames() {
+            const container = document.getElementById('group-names');
+            container.innerHTML = groups.map(group => `
+    <div class="group-item">
+      <input style="margin-bottom: 4px" value="${group.name}" 
+             onchange="groups[${group.id - 1}].name = this.value; updatePreview()">
+      <button class="btn" style="background: none; color: #ef4444; padding: 8px" onclick="groups.splice(${group.id - 1}, 1); updateGroupNames(); renderTable(); updatePreview()">
+        <i class="bx bx-trash-alt"></i>
+      </button>
+    </div>
+  `).join('');
+          }
+        </script>
+
+        <!-- Tooltip for formatting options -->
+        <div id="tooltip" class="tooltip" onmouseleave="hideTooltip()">
+          <div class="formatting-buttons">
+            <button onclick="toggleBold()"><i class="bx bx-bold"></i></button>
+            <button onclick="toggleItalic()"><i class="bx bx-italic"></i></button>
+            <button onclick="toggleUnderline()"><i class="bx bx-underline"></i></button>
+            <button onclick="alignLeft()"><i class="bx bx-align-left"></i></button>
+            <button onclick="alignCenter()"><i class="bx bx-align-middle"></i></button>
+            <button onclick="alignRight()"><i class="bx bx-align-right"></i></button>
+            <button onclick="increaseFontSize()"><i class="bx bx-font-size"></i></button>
+            <button onclick="decreaseFontSize()"><i class="bx bx-font-size"></i></button>
+            <input type="color" onchange="changeFontColor(this.value)">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>
