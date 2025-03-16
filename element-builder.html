@@ -52,6 +52,7 @@
       <div style="margin-top: 24px;">
         <label>Display Column: </label>
         <select id="display-column" onchange="updatePreview()">
+        <select id="display-column" onchange="updatePreview()">
           <option value="0">Column 1</option>
         </select>
         <div style="position: relative; display: inline-block;">
@@ -66,6 +67,10 @@
       <div id="group-names-container">
         <h3>Group Names</h3>
         <div id="group-names"></div>
+      </div>
+
+      <div class="layout-builder" id="layout-builder">
+        <h3>Layout Builder</h3>
       </div>
 
       <div class="layout-builder" id="layout-builder">
@@ -119,6 +124,19 @@
           helpIcon.addEventListener('mouseout', () => {
             tooltip.style.display = 'none';
           });
+          let draggedBlock = null;
+          let layoutBlocks = [];
+
+          const helpIcon = document.getElementById('help-icon');
+          const tooltip = document.getElementById('display-column-tooltip');
+
+          helpIcon.addEventListener('mouseover', () => {
+            tooltip.style.display = 'block';
+          });
+
+          helpIcon.addEventListener('mouseout', () => {
+            tooltip.style.display = 'none';
+          });
 
           function addColumn() {
             const newId = columns.length;
@@ -127,8 +145,14 @@
               name: `Column ${newId + 1}`,
               visible: true
             });
+            columns.push({
+              id: newId,
+              name: `Column ${newId + 1}`,
+              visible: true
+            });
             renderTable();
             updateDisplayColumnOptions();
+            updateLayoutItems();
             updateLayoutItems();
           }
 
@@ -149,10 +173,12 @@
             renderTable();
             updateDisplayColumnOptions();
             updateLayoutItems();
+            updateLayoutItems();
           }
 
           function addRow() {
             rows.push({
+              values: columns.map(() => ''),
               values: columns.map(() => ''),
               groupId: null
             });
@@ -186,9 +212,50 @@
         </th>
       `).join('')}
       <th>Group</th><th>Actions</th>`;
+      <th>#</th>
+      ${columns.map(col => `
+        <th>
+          <div class="column-header">
+            <input class="table-input" value="${col.name}" 
+                   onchange="updateColumnName(${col.id}, this.value)">
+            <button class="btn" onclick="deleteColumn(${col.id})" 
+                    style="border: none; background: none; padding: 4px 8px">
+              <i class="bx bx-x"></i>
+            </button>
+          </div>
+        </th>
+      `).join('')}
+      <th>Group</th><th>Actions</th>`;
 
             // Render body
             body.innerHTML = rows.map((row, rowIndex) => `
+      <tr>
+        <td>${rowIndex + 1}</td>
+        ${columns.map((col, colIndex) => `
+          <td>
+            <input class="table-input" 
+                   value="${row.values[colIndex] || ''}" 
+                   onchange="updateCell(${rowIndex}, ${colIndex}, this.value)">
+          </td>
+        `).join('')}
+        <td>
+          <select onchange="updateGroup(${rowIndex}, this.value)">
+            <option value="">No Group</option>
+            ${groups.map(group => `
+              <option value="${group.id}" ${row.groupId === group.id ? 'selected' : ''}>
+                ${group.name}
+              </option>
+            `).join('')}
+          </select>
+        </td>
+        <td>
+          <button class="btn" onclick="deleteRow(${rowIndex})" 
+                  style="background: none; border: none; padding: 4px 8px">
+            <i class="bx bx-trash-alt"></i>
+          </button>
+        </td>
+      </tr>
+    `).join('');
       <tr>
         <td>${rowIndex + 1}</td>
         ${columns.map((col, colIndex) => `
@@ -242,6 +309,7 @@
           }
           function updatePreview() {
             displayColumnIndex = document.getElementById('display-column').value;
+            displayColumnIndex = document.getElementById('display-column').value;
             const menu = document.getElementById('preview-menu');
 
             // Group rows by their groupId
@@ -260,10 +328,23 @@
               .filter(child => child.classList.contains('layout-item'))
               .map(child => parseInt(child.getAttribute('data-id')));
 
+            // Get the current layout from the layout-builder
+            const layoutBuilder = document.getElementById('layout-builder');
+            const layoutOrder = Array.from(layoutBuilder.children)
+              .filter(child => child.classList.contains('layout-item'))
+              .map(child => parseInt(child.getAttribute('data-id')));
+
             // Render grouped dropdown items
             menu.innerHTML = Object.entries(groupedRows).map(([groupId, rows]) => {
               const group = groups.find(g => g.id == groupId) || { name: '' };
               return `
+        <div class="dropdown-group">
+          ${groupId !== 'ungrouped' ? `
+            <div class="group-header">
+              <input value="${group.name}" onchange="updateGroupName(${groupId}, this.value)">
+            </div>
+          ` : ''}
+          ${rows.map(row => {
         <div class="dropdown-group">
           ${groupId !== 'ungrouped' ? `
             <div class="group-header">
@@ -281,6 +362,15 @@
                   const textAlign = item.style.textAlign ? `text-align: ${item.style.textAlign};` : '';
                   return row.values[colIndex] ? `<div style="${bold} ${italic} ${underline} ${textAlign}">${row.values[colIndex]}</div>` : '';
                 }).join('');
+                const secondaryInfo = layoutOrder.map(colId => {
+                  const colIndex = columns.findIndex(col => col.id === colId);
+                  const item = document.querySelector(`.layout-item[data-id="${colId}"]`);
+                  const bold = item.querySelector('.bx-bold').classList.contains('active') ? 'font-weight: bold;' : '';
+                  const italic = item.querySelector('.bx-italic').classList.contains('active') ? 'font-style: italic;' : '';
+                  const underline = item.querySelector('.bx-underline').classList.contains('active') ? 'text-decoration: underline;' : '';
+                  const textAlign = item.style.textAlign ? `text-align: ${item.style.textAlign};` : '';
+                  return row.values[colIndex] ? `<div style="${bold} ${italic} ${underline} ${textAlign}">${row.values[colIndex]}</div>` : '';
+                }).join('');
 
                 return `
               <div class="dropdown-item" onclick="selectItem('${primaryText}')">
@@ -288,7 +378,14 @@
                 ${secondaryInfo ? `<div class="item-secondary">${secondaryInfo}</div>` : ''}
               </div>
             `;
+              <div class="dropdown-item" onclick="selectItem('${primaryText}')">
+                <div class="item-primary"><b>${primaryText}</b></div>
+                ${secondaryInfo ? `<div class="item-secondary">${secondaryInfo}</div>` : ''}
+              </div>
+            `;
               }).join('')}
+        </div>
+      `;
         </div>
       `;
             }).join('');
@@ -780,6 +877,9 @@
                     menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
                     }
         </script>
+      </div>
+    </div>
+  </div>
       </div>
     </div>
   </div>
