@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Custom multi-column, multi-row dropdown builder with preview and code generation">
+    <meta name="keywords" content="dropdown, builder, preview, code generation">
+    <title>Custom Dropdown Builder</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <script src="prism.js"></script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "Advanced Dropdown Builder",
+            "description": "Create custom dropdown menus with visual layout builder and real-time preview",
+            "applicationCategory": "Developer Tools"
+        }
+    </script>
+    <link rel="stylesheet" href="prism.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+    <link rel="stylesheet" href="Satoshi_Complete/Fonts/WEB/css/satoshi.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="builder-panel">
+            <h2>Dropdown Builder</h2>
+            <div class="table-container">
+                <table class="options-table" id="options-table">
+                    <thead id="table-header"></thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 16px;">
+                <button class="btn" id="addColumnButton">
+                    <i class="bx bx-plus"></i> Add Column
+                </button>
+                <button class="btn" id="addRowButton">
+                    <i class="bx bx-plus"></i> Add Row
+                </button>
+                <button class="btn" id="addGroupButton">
+                    <i class="bx bx-category"></i> Add Group
+                </button>
+            </div>
+            <div style="margin-top: 24px;">
+                <label>Display Column: </label>
+                <select id="display-column"></select>
+                <div style="position: relative; display: inline-block;">
+                    <i class="bx bx-help-circle" id="help-icon"
+                        style="color: #c9ccdf; margin-left: 10px; cursor: pointer"></i>
+                </div>
+                <div id="display-column-tooltip"
+                    style="display: none; position: absolute; background-color: var(--background); font-size: 12px; color: var(--primary); border: 1px solid var(--border); padding: 8px; border-radius: var(--radius); font-family: 'Satoshi-Regular'; margin-left: -140px; width: 200px; left: 40em; top: 25em;">
+                    The corresponding value of the selected column will be what is displayed on the selected dropdown
+                    option.
+                </div>
+            </div>
+            <div id="group-names-container">
+                <h3>Group Names</h3>
+                <div id="group-names"></div>
+            </div>
+            <div class="layout-builder" id="layout-builder">
+                <h3>Layout Builder</h3>
+            </div>
+        </div>
+        <div class="builder-panel">
+            <h2>Preview</h2>
+            <div class="dropdown-preview">
+                <div class="dropdown-button" id="preview-button">
+                    <span>Select an option</span>
+                    <i class="bx bx-chevron-down"></i>
+                </div>
+                <div class="dropdown-menu" id="preview-menu"></div>
+            </div>
+            <div class="header-div">
+                <h2>Code</h2>
+                <button class="btn" id="generateCodeButton" style="display: initial;">
+                    <i class="bx bx-code"></i> Generate Code
+                </button>
+                <button class="btn" id="runCodeButton">
+                    <i class="bx bx-play"></i> Run
+                </button>
+            </div>
+            <div class="code-preview">
+                <button class="btn" id="copy-button"
+                    style="position: absolute; top: 12px; right: 12px;">
+                    <i class="bx bx-copy"></i> Copy
+                </button>
+                <pre><code class="language-html" id="generated-code"></code></pre>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="script.js"></script>
+</body>
+
+</html>

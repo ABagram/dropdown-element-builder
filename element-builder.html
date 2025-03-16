@@ -4,11 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Custom dropdown builder with preview and code generation">
+  <meta name="description" content="Custom multi-column, multi-row dropdown builder with preview and code generation">
   <meta name="keywords"
-    content="dropdown, builder, preview, code generation, html, css, javascript, UI, custom, user interface, select">
+    content="dropdown, builder, preview, code generation">
 
-  <title>Advanced Dropdown Builder</title>
+  <title>Custom Dropdown Builder</title>
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
   <script src="prism.js"></script>
 
@@ -22,401 +22,6 @@
   }
 
   </script>
-  <link rel="stylesheet" href="prism.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
-  <link rel="stylesheet" href="Satoshi_Complete\Fonts\WEB\css\satoshi.css">
-
-  <style>
-    :root {
-      --primary: #111;
-      --secondary: #4565EDff;
-      --alice-blue: #EAF3FFff;
-      --background: #f8fafc;
-      --surface: #ffffff;
-      --border: #e2e8f0;
-      --radius: 8px;
-    }
-
-    body {
-      font-family: 'Satoshi-Bold', sans-serif;
-      margin: 0;
-      padding: 24px;
-      background: var(--background);
-      color: var(--primary);
-    }
-
-    .container {
-      max-width: 1440px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 32px;
-    }
-
-    @media (max-width: 1024px) {
-      .container{
-        grid-template-columns: 1fr;
-      }
-      .layout-item {
-        position: relative !important;
-        width: 100% !important;
-        margin: 8px 0;
-      }
-
-      .options-table {
-        min-width: 300px;
-      }
-      .dropdown-preview{
-        max-width: 100%;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .container {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .container {
-        padding: 8px;
-      }
-
-      .btn {
-        font-size: 12px;
-        padding: 6px 10px;
-      }
-
-      .table-input {
-        font-size: 14px;
-      }
-    }
-
-    .builder-panel {
-      background: var(--surface);
-      border-radius: var(--radius);
-      padding: 24px;
-      border: 1px solid var(--border);
-    }
-
-    .table-container {
-      overflow-x: auto;
-      margin: 16px 0;
-    }
-
-    .options-table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      min-width: 500px;
-    }
-
-    .options-table th,
-    .options-table td {
-      padding: 12px;
-      border-bottom: 1px solid var(--border);
-      border-right: 1px solid var(--border);
-    }
-
-    .column-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .table-input {
-      width: calc(100% - 16px);
-      /* Adjust width to fit within the cell padding */
-      padding: 8px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      font-family: inherit;
-      box-sizing: border-box;
-      /* Ensure padding and border are included in the element's total width and height */
-    }
-
-    .btn {
-      padding: 8px 16px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      background: var(--alice-blue);
-      color: var(--secondary);
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: opacity 0.2s;
-      font-family: inherit;
-    }
-
-    select {
-      padding: 8px;
-      margin-left: 10px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-    }
-
-    .dropdown-preview {
-      position: relative;
-      width: 100%;
-      max-width: 400px;
-      margin: 24px 0;
-    }
-
-    .dropdown-button {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--surface);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .dropdown-menu {
-      position: absolute;
-      width: 100%;
-      margin-top: 8px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--surface);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-      max-height: 300px;
-      overflow-y: auto;
-      display: none;
-      z-index: 1000;
-    }
-
-    .dropdown-group {
-      border-bottom: 1px solid var(--border);
-    }
-
-    .group-header {
-      padding: 16px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .group-header input {
-      border: none;
-      background: transparent;
-      font-weight: 600;
-      font-family: inherit;
-      flex: 1;
-    }
-
-    .dropdown-item {
-      padding: 12px 16px;
-      cursor: pointer;
-      transition: background 0.2s;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .dropdown-item:hover {
-      background: #f8fafc;
-    }
-
-    .item-primary {
-      font-weight: 500;
-      font-size: 14px;
-    }
-
-    .item-primary b {
-      font-weight: 600;
-    }
-
-    .item-secondary {
-      font-size: 12px;
-      color: #64748b;
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .header-div {
-      display: flex;
-      align-items: center;
-    }
-
-    .header-div button {
-      background: var(--secondary);
-      color: var(--alice-blue);
-      margin-left: 10px;
-    }
-
-    .code-preview {
-      background: var(--background);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-      position: relative;
-      word-wrap: normal;
-    }
-
-    @media (max-width: 480px) {
-      body {
-        padding: 12px;
-      }
-
-      .builder-panel {
-        padding: 16px;
-      }
-
-      .btn {
-        padding: 6px 12px;
-        font-size: 14px;
-      }
-    }
-
-    .toggle-formatting .active {
-      color: #0066ff;
-    }
-
-    #group-names-container {
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      background: var(--surface);
-      margin-top: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .layout-container {
-      display: flex;
-      gap: 16px;
-      margin-top: 24px;
-    }
-
-    .layout-column {
-      flex: 1;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      background: var(--surface);
-      min-height: 200px;
-    }
-
-    .layout-item {
-      padding: 20px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      background: var(--background);
-      margin-bottom: 8px;
-      cursor: grab;
-      flex: 1 1 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: absolute;
-      width: 150px;
-      min-height: 50px;
-      transition: transform 0.2s;
-    }
-
-    .drag-handle {
-      cursor: grab;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .layout-builder {
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      background: var(--surface);
-      min-height: 200px;
-      margin-top: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      flex-wrap: wrap;
-      position: relative;
-      min-height: 400px;
-    }
-
-    .layout-item.selected {
-      font-weight: bold;
-    }
-
-    .layout-item .subtitle {
-      font-size: 12px;
-      background-color: var(--alice-blue);
-      padding: 8px;
-      margin-left: 10px;
-      color: var(--secondary);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      font-weight: 400;
-    }
-
-    .formatting-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-      padding: 8px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-    }
-
-    .formatting-buttons {
-      display: flex;
-      gap: 4px;
-    }
-
-    .formatting-buttons button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-      color: #1e293b;
-    }
-
-    .formatting-buttons button.active {
-      color: var(--primary);
-    }
-
-    .options-table tr th {
-      border-top: 1px solid var(--border);
-    }
-
-    .options-table th:first-child,
-    .options-table td:first-child {
-      text-align: center;
-      background: var(--background);
-      font-weight: bold;
-      font-size: 12px;
-      /* Adjust font size to match the majority of the text */
-      border-left: 1px solid var(--border);
-    }
-
-    .options-table tr:first-child th:first-child {
-      border-top-left-radius: var(--radius);
-    }
-
-    .options-table tr:first-child th:last-child {
-      border-top-right-radius: var(--radius);
-    }
-
-    .options-table tr:last-child td:first-child {
-      border-bottom-left-radius: var(--radius);
-    }
-
-    .options-table tr:last-child td:last-child {
-      border-bottom-right-radius: var(--radius);
-    }
-  </style>
 </head>
 
 <body>
@@ -613,6 +218,28 @@
     `).join('');
           }
 
+          // Replace the current runCode() function with:
+          function runCode() {
+            const preview = document.getElementById('preview-menu');
+            const code = document.getElementById('generated-code').textContent;
+
+            // Create sandboxed iframe
+            const iframe = document.createElement('iframe');
+            iframe.style.cssText = 'width:100%; height:300px; border:none;';
+
+            // Clear previous content
+            while (preview.firstChild) {
+              preview.removeChild(preview.firstChild);
+            }
+
+            preview.appendChild(iframe);
+
+            // Write generated code to iframe
+            const iframeDoc = iframe.contentWindow.document;
+            iframeDoc.open();
+            iframeDoc.write(code);
+            iframeDoc.close();
+          }
           function updatePreview() {
             displayColumnIndex = document.getElementById('display-column').value;
             const menu = document.getElementById('preview-menu');
@@ -685,17 +312,17 @@
                 </div>
                 <div class="dropdown-menu">`;
 
-              // Generate menu items
-              const groupedRows = rows.reduce((acc, row) => {
-                const groupId = row.groupId || 'ungrouped';
-                if (!acc[groupId]) acc[groupId] = [];
-                acc[groupId].push(row);
-                return acc;
-              }, {});
+            // Generate menu items
+            const groupedRows = rows.reduce((acc, row) => {
+              const groupId = row.groupId || 'ungrouped';
+              if (!acc[groupId]) acc[groupId] = [];
+              acc[groupId].push(row);
+              return acc;
+            }, {});
 
-              dropdownHTML += Object.entries(groupedRows).map(([groupId, rows]) => {
-                const group = groups.find(g => g.id == groupId) || { name: '' };
-                return `
+            dropdownHTML += Object.entries(groupedRows).map(([groupId, rows]) => {
+              const group = groups.find(g => g.id == groupId) || { name: '' };
+              return `
                   <div class="dropdown-group">
                     ${groupId !== 'ungrouped' ? `
                     <div class="group-header">
@@ -706,9 +333,9 @@
                       <div class="item-primary"><b>${row.values[displayColumnIndex]}</b></div>
                     </div>`).join('')}
                   </div>`;
-                          }).join('');
+            }).join('');
 
-                          dropdownHTML += `
+            dropdownHTML += `
                 </div>
               </div>`;
 
@@ -774,189 +401,238 @@
 
           // Remove all existing calls to generateCode() from other functions
         </script>
-        
+
         <script>
-        function updateColumnName(columnId, newName) {
-        columns.find(col => col.id === columnId).name = newName;
-        updateDisplayColumnOptions();
-        updatePreview();
-        }
+          function updateColumnName(columnId, newName) {
+            columns.find(col => col.id === columnId).name = newName;
+            updateDisplayColumnOptions();
+            updatePreview();
+          }
 
-        function updateCell(rowIndex, colIndex, value) {
-        rows[rowIndex].values[colIndex] = value;
-        updatePreview();
-        }
+          function updateCell(rowIndex, colIndex, value) {
+            rows[rowIndex].values[colIndex] = value;
+            updatePreview();
+          }
 
-        function deleteRow(rowIndex) {
-        rows.splice(rowIndex, 1);
-        renderTable();
-        updatePreview();
-        }
+          function deleteRow(rowIndex) {
+            rows.splice(rowIndex, 1);
+            renderTable();
+            updatePreview();
+          }
 
-        function updateGroup(rowIndex, groupId) {
-        rows[rowIndex].groupId = groupId ? parseInt(groupId) : null;
-        updatePreview();
-        }
+          function updateGroup(rowIndex, groupId) {
+            rows[rowIndex].groupId = groupId ? parseInt(groupId) : null;
+            updatePreview();
+          }
 
-        function updateGroupName(groupId, newName) {
-        const group = groups.find(g => g.id == groupId);
-        if (group) group.name = newName;
-        updatePreview();
-        }
+          function updateGroupName(groupId, newName) {
+            const group = groups.find(g => g.id == groupId);
+            if (group) group.name = newName;
+            updatePreview();
+          }
 
-        function updateGroupNames() {
-        const container = document.getElementById('group-names');
-        container.innerHTML = groups.map(group => `
+          function updateGroupNames() {
+            const container = document.getElementById('group-names');
+            container.innerHTML = groups.map(group => `
         <div style="margin-bottom: 8px;">
           <input class="table-input" value="${group.name}" onchange="updateGroupName(${group.id}, this.value)">
         </div>
         `).join('');
-        }
+          }
 
-        function handleBlockDrop(dropCoords, existingBlocks, draggedSize) {
-        const newBlock = {
-        x: dropCoords.x,
-        y: dropCoords.y,
-        width: draggedSize.width,
-        height: draggedSize.height,
-        id: Date.now() // Generate unique ID
-        };
+          function handleBlockDrop(dropCoords, existingBlocks, draggedSize) {
+            const newBlock = {
+              x: dropCoords.x,
+              y: dropCoords.y,
+              width: draggedSize.width,
+              height: draggedSize.height,
+              id: Date.now() // Generate unique ID
+            };
 
-        // 1. Collision Detection
-        const collisions = existingBlocks.filter(block =>
-        checkCollision(newBlock, block)
-        );
+            // 1. Collision Detection
+            const collisions = existingBlocks.filter(block =>
+              checkCollision(newBlock, block)
+            );
 
-        if (collisions.length === 0) {
-        return [...existingBlocks, newBlock];
-        }
+            if (collisions.length === 0) {
+              return [...existingBlocks, newBlock];
+            }
 
-        // 2. Find target block with largest overlap
-        const targetBlock = collisions.reduce((prev, current) => {
-        const prevArea = calculateOverlapArea(newBlock, prev);
-        const currentArea = calculateOverlapArea(newBlock, current);
-        return currentArea > prevArea ? current : prev;
-        });
+            // 2. Find target block with largest overlap
+            const targetBlock = collisions.reduce((prev, current) => {
+              const prevArea = calculateOverlapArea(newBlock, prev);
+              const currentArea = calculateOverlapArea(newBlock, current);
+              return currentArea > prevArea ? current : prev;
+            });
 
-        // 3. Calculate relative position
-        const { direction, position } = calculatePlacement(newBlock, targetBlock);
+            // 3. Calculate relative position
+            const { direction, position } = calculatePlacement(newBlock, targetBlock);
 
-        // 4. Adjust position based on placement rules
-        const placedBlock = positionBlock(newBlock, targetBlock, direction);
+            // 4. Adjust position based on placement rules
+            const placedBlock = positionBlock(newBlock, targetBlock, direction);
 
-        // 5. Handle layout adjustments
-        const adjustedBlocks = adjustLayout(
-        [...existingBlocks, placedBlock],
-        placedBlock
-        );
+            // 5. Handle layout adjustments
+            const adjustedBlocks = adjustLayout(
+              [...existingBlocks, placedBlock],
+              placedBlock
+            );
 
-        return adjustedBlocks;
-        }
+            return adjustedBlocks;
+          }
 
-        // Helper functions
-        function checkCollision(rect1, rect2) {
-        return !(
-        rect2.x >= rect1.x + rect1.width ||
-        rect2.x + rect2.width <= rect1.x || rect2.y>= rect1.y + rect1.height ||
-          rect2.y + rect2.height <= rect1.y ); } function calculateOverlapArea(rect1, rect2) { const
-            xOverlap=Math.max(0, Math.min(rect1.x + rect1.width, rect2.x + rect2.width) - Math.max(rect1.x, rect2.x));
-            const yOverlap=Math.max(0, Math.min(rect1.y + rect1.height, rect2.y + rect2.height) - Math.max(rect1.y,
-            rect2.y)); return xOverlap * yOverlap; } function calculatePlacement(newBlock, target) { const newCenter={
-            x: newBlock.x + newBlock.width / 2, y: newBlock.y + newBlock.height / 2 }; const targetBounds={ left:
-            target.x, right: target.x + target.width, top: target.y, bottom: target.y + target.height, width:
-            target.width, height: target.height }; // Calculate relative position percentages const
-            xPercentage=(newCenter.x - targetBounds.left) / targetBounds.width; const yPercentage=(newCenter.y -
-            targetBounds.top) / targetBounds.height; // Determine placement direction if (xPercentage> 0.66 &&
-            yPercentage > 0.2 && yPercentage < 0.8) { return { direction: 'right' , position: 'vertical' }; } if
-              (xPercentage < 0.33 && yPercentage> 0.2 && yPercentage < 0.8) { return { direction: 'left' ,
-                position: 'vertical' }; } if (yPercentage < 0.33 && xPercentage> 0.2 && xPercentage < 0.8) { return {
-                  direction: 'top' , position: 'horizontal' }; } if (yPercentage> 0.66 && xPercentage > 0.2 &&
-                  xPercentage < 0.8) { return { direction: 'bottom' , position: 'horizontal' }; } return {
-                    direction: 'overlap' , position: 'stack' }; } function positionBlock(newBlock, target, direction) {
-                    const margin=10; const positionedBlock={ ...newBlock }; switch (direction) { case 'right' :
-                    positionedBlock.x=target.x + target.width + margin; positionedBlock.y=target.y + (target.height -
-                    newBlock.height) / 2; break; case 'left' : positionedBlock.x=target.x - newBlock.width - margin;
-                    positionedBlock.y=target.y + (target.height - newBlock.height) / 2; break; case 'top' :
-                    positionedBlock.x=target.x + (target.width - newBlock.width) / 2; positionedBlock.y=target.y -
-                    newBlock.height - margin; break; case 'bottom' : positionedBlock.x=target.x + (target.width -
-                    newBlock.width) / 2; positionedBlock.y=target.y + target.height + margin; break; default: // Default
-                    stack behavior positionedBlock.x=target.x; positionedBlock.y=target.y + target.height + margin; }
-                    return positionedBlock; } function adjustLayout(blocks, newBlock) { // Basic collision resolution
-                    return blocks.map(block=> {
-                    if (block.id === newBlock.id || !checkCollision(block, newBlock)) {
-                    return block;
-                    }
+          // Helper functions
+          function checkCollision(rect1, rect2) {
+            return !(
+              rect2.x >= rect1.x + rect1.width ||
+              rect2.x + rect2.width <= rect1.x ||
+              rect2.y >= rect2.y <= rect1.height ||
+              rect2.y + rect2.height <= rect1.y ||
+            );
+          } 
+          
+          function calculateOverlapArea(rect1, rect2) {
+            const xOverlap = Math.max(0, Math.min(rect1.x + rect1.width, rect2.x + rect2.width) - Math.max(rect1.x, rect2.x));
+            const yOverlap = Math.max(0, Math.min(rect1.y + rect1.height, rect2.y + rect2.height) - Math.max(rect1.y, rect2.y)); 
+            return xOverlap * yOverlap;
+          } 
+          
+          function calculatePlacement(newBlock, target) {
+            const newCenter = {
+              x: newBlock.x + newBlock.width / 2, 
+              y: newBlock.y + newBlock.height / 2
+            };
 
-                    // Simple push right strategy
-                    return {
-                    ...block,
-                    x: block.x + newBlock.width + 10
-                    };
-                    });
-                    }
+            const targetBounds = {
+              left: target.x,
+              right: target.x + target.width,
+              top: target.y,
+              bottom: target.y + target.height,
+              width: target.width,
+              height: target.height
+            };
+            
+            // Calculate relative position percentages
+            const xPercentage = (newCenter.x - targetBounds.left) / targetBounds.width;
+            const yPercentage = (newCenter.y - targetBounds.top) / targetBounds.height; 
+            
+            // Determine placement direction
+            if (xPercentage> 0.66 && yPercentage > 0.2 && yPercentage < 0.8) { 
+              return { 
+                direction: 'right', 
+                position: 'vertical' 
+              }; 
+            } 
+            if (xPercentage < 0.33 && yPercentage > 0.2 && yPercentage < 0.8) {
+                return {
+                  direction: 'left',
+                  position: 'vertical'
+                };
+            } 
+            if (yPercentage < 0.33 && xPercentage > 0.2 && xPercentage < 0.8) {
+              return {
+                direction: 'top', 
+                position: 'horizontal'
+              };
+            } 
+            if (yPercentage > 0.66 && xPercentage > 0.2 && xPercentage < 0.8) {
+              return { 
+                direction: 'bottom', 
+                position: 'horizontal' 
+              }; } 
+              return {
+                direction: 'overlap', 
+                position: 'stack'
+              };
+          }
+          
+          function positionBlock(newBlock, target, direction) {
+            const margin = 10; const positionedBlock = { ...newBlock }; switch (direction) {
+              case 'right':
+                positionedBlock.x = target.x + target.width + margin; positionedBlock.y = target.y + (target.height -
+                  newBlock.height) / 2; break; case 'left': positionedBlock.x = target.x - newBlock.width - margin;
+                positionedBlock.y = target.y + (target.height - newBlock.height) / 2; break; case 'top':
+                positionedBlock.x = target.x + (target.width - newBlock.width) / 2; positionedBlock.y = target.y -
+                  newBlock.height - margin; break; case 'bottom': positionedBlock.x = target.x + (target.width -
+                    newBlock.width) / 2; positionedBlock.y = target.y + target.height + margin; break; default: // Default
+                    stack behavior positionedBlock.x = target.x; positionedBlock.y = target.y + target.height + margin;
+            }
+            return positionedBlock;
+          } function adjustLayout(blocks, newBlock) { // Basic collision resolution
+            return blocks.map(block => {
+              if (block.id === newBlock.id || !checkCollision(block, newBlock)) {
+                return block;
+              }
 
-                    const existingBlocks = [
-                    { x: 100, y: 100, width: 200, height: 150, id: 1 }
-                    ];
+              // Simple push right strategy
+              return {
+                ...block,
+                x: block.x + newBlock.width + 10
+              };
+            });
+          }
 
-                    const newBlock = handleBlockDrop(
-                    { x: 150, y: 120 }, // Drop coordinates
-                    existingBlocks,
-                    { width: 180, height: 120 } // Dragged block size
-                    );
+          const existingBlocks = [
+            { x: 100, y: 100, width: 200, height: 150, id: 1 }
+          ];
 
-                    function updateLayoutItems() {
-                    const layoutBuilder = document.getElementById('layout-builder');
-                    const displayColumnIndex = document.getElementById('display-column').value;
+          const newBlock = handleBlockDrop(
+            { x: 150, y: 120 }, // Drop coordinates
+            existingBlocks,
+            { width: 180, height: 120 } // Dragged block size
+          );
 
-                    // Clear existing items
-                    layoutBuilder.innerHTML = '<h3>Layout Builder</h3>';
+          function updateLayoutItems() {
+            const layoutBuilder = document.getElementById('layout-builder');
+            const displayColumnIndex = document.getElementById('display-column').value;
 
-                    // Create or update layoutBlocks when columns change
-                    layoutBlocks = columns.map((col, index) => {
-                    const existing = layoutBlocks.find(b => b.id === col.id);
-                    return existing || {
-                    id: col.id,
-                    x: index * 160,
-                    y: 0,
-                    width: 150,
-                    height: 50
-                    };
-                    });
+            // Clear existing items
+            layoutBuilder.innerHTML = '<h3>Layout Builder</h3>';
 
-                    // Create new layout items using layoutBlocks
-                    layoutBlocks.forEach(block => {
-                    const col = columns.find(c => c.id === block.id);
-                    const layoutItem = document.createElement('div');
-                    layoutItem.className = 'layout-item';
-                    layoutItem.setAttribute('data-id', block.id);
-                    layoutItem.setAttribute('draggable', 'true');
-                    layoutItem.style.left = `${block.x}px`;
-                    layoutItem.style.top = `${block.y}px`;
-                    layoutItem.innerHTML = `
+            // Create or update layoutBlocks when columns change
+            layoutBlocks = columns.map((col, index) => {
+              const existing = layoutBlocks.find(b => b.id === col.id);
+              return existing || {
+                id: col.id,
+                x: index * 160,
+                y: 0,
+                width: 150,
+                height: 50
+              };
+            });
+
+            // Create new layout items using layoutBlocks
+            layoutBlocks.forEach(block => {
+              const col = columns.find(c => c.id === block.id);
+              const layoutItem = document.createElement('div');
+              layoutItem.className = 'layout-item';
+              layoutItem.setAttribute('data-id', block.id);
+              layoutItem.setAttribute('draggable', 'true');
+              layoutItem.style.left = `${block.x}px`;
+              layoutItem.style.top = `${block.y}px`;
+              layoutItem.innerHTML = `
                     <div class="drag-handle" ondragstart="handleDragStart(event, ${block.id})">
                       <i class="bx bx-move"></i>
                       <div>
                         ${col.name}
                         ${columns.findIndex(c => c.id === block.id) == displayColumnIndex ? '<span
-                          class="subtitle">Display</span>' : ''}
-                      </div>
-                    </div>
-                    <div class="formatting-buttons">
-                      <button class="toggle-formatting" onclick="toggleBold(${block.id})"><i
-                          class="bx bx-bold"></i></button>
-                      <button class="toggle-formatting" onclick="toggleItalic(${block.id})"><i
-                          class="bx bx-italic"></i></button>
-                      <button class="toggle-formatting" onclick="toggleUnderline(${block.id})"><i
-                          class="bx bx-underline"></i></button>
-                      <button class="toggle-formatting" onclick="alignLeft(${block.id})"><i
-                          class="bx bx-align-left"></i></button>
-                      <button class="toggle-formatting" onclick="alignCenter(${block.id})"><i
-                          class="bx bx-align-middle"></i></button>
-                      <button class="toggle-formatting" onclick="alignRight(${block.id})"><i
-                          class="bx bx-align-right"></i></button>
-                    </div>
-                    `;
+                          class="subtitle" > Display</span > ' : ''}
+                      </div >
+                    </div >
+                <div class="formatting-buttons">
+                  <button class="toggle-formatting" onclick="toggleBold(${block.id})"><i
+                    class="bx bx-bold"></i></button>
+                  <button class="toggle-formatting" onclick="toggleItalic(${block.id})"><i
+                    class="bx bx-italic"></i></button>
+                  <button class="toggle-formatting" onclick="toggleUnderline(${block.id})"><i
+                    class="bx bx-underline"></i></button>
+                  <button class="toggle-formatting" onclick="alignLeft(${block.id})"><i
+                    class="bx bx-align-left"></i></button>
+                  <button class="toggle-formatting" onclick="alignCenter(${block.id})"><i
+                    class="bx bx-align-middle"></i></button>
+                  <button class="toggle-formatting" onclick="alignRight(${block.id})"><i
+                    class="bx bx-align-right"></i></button>
+                </div>
+              `;
                     layoutBuilder.appendChild(layoutItem);
                     });
 
@@ -1008,62 +684,62 @@
 
                     function updateLayoutPositions(blocks) {
                     blocks.forEach(block => {
-                    const element = document.querySelector(`.layout-item[data-id="${block.id}"]`);
+                    const element = document.querySelector(`.layout - item[data - id="${block.id}"]`);
                     if (element) {
-                    element.style.left = `${block.x}px`;
-                    element.style.top = `${block.y}px`;
+                    element.style.left = `${ block.x } px`;
+                    element.style.top = `${ block.y } px`;
                     }
                     });
                     }
 
                     function toggleBold(columnId) {
-                    const button = document.querySelector(`.layout-item[data-id="${columnId}"] .bx-bold`);
+                    const button = document.querySelector(`.layout - item[data - id="${columnId}"] .bx - bold`);
                     button.classList.toggle('active');
                     updatePreview();
                     }
 
                     function toggleItalic(columnId) {
-                    const button = document.querySelector(`.layout-item[data-id="${columnId}"] .bx-italic`);
+                    const button = document.querySelector(`.layout - item[data - id="${columnId}"] .bx - italic`);
                     button.classList.toggle('active');
                     updatePreview();
                     }
 
                     function toggleUnderline(columnId) {
-                    const button = document.querySelector(`.layout-item[data-id="${columnId}"] .bx-underline`);
+                    const button = document.querySelector(`.layout - item[data - id="${columnId}"] .bx - underline`);
                     button.classList.toggle('active');
                     updatePreview();
                     }
 
                     function alignLeft(columnId) {
-                    const button = document.querySelector(`.layout-item[data-id="${columnId}"] .bx-align-left`);
+                    const button = document.querySelector(`.layout - item[data - id="${columnId}"] .bx - align - left`);
                     button.classList.add('active');
-                    document.querySelector(`.layout-item[data-id="${columnId}"]
-                    .bx-align-middle`).classList.remove('active');
-                    document.querySelector(`.layout-item[data-id="${columnId}"]
-                    .bx-align-right`).classList.remove('active');
-                    document.querySelector(`.layout-item[data-id="${columnId}"]`).style.textAlign = 'left';
+                    document.querySelector(`.layout - item[data - id="${columnId}"]
+                    .bx - align - middle`).classList.remove('active');
+                    document.querySelector(`.layout - item[data - id="${columnId}"]
+                    .bx - align - right`).classList.remove('active');
+                    document.querySelector(`.layout - item[data - id="${columnId}"]`).style.textAlign = 'left';
                     updatePreview();
                     }
 
                     function alignCenter(columnId) {
-                    const button = document.querySelector(`.layout-item[data-id="${columnId}"] .bx-align-middle`);
+                    const button = document.querySelector(`.layout - item[data - id="${columnId}"] .bx - align - middle`);
                     button.classList.add('active');
-                    document.querySelector(`.layout-item[data-id="${columnId}"]
-                    .bx-align-left`).classList.remove('active');
-                    document.querySelector(`.layout-item[data-id="${columnId}"]
-                    .bx-align-right`).classList.remove('active');
-                    document.querySelector(`.layout-item[data-id="${columnId}"]`).style.textAlign = 'center';
+                    document.querySelector(`.layout - item[data - id="${columnId}"]
+                    .bx - align - left`).classList.remove('active');
+                    document.querySelector(`.layout - item[data - id="${columnId}"]
+                    .bx - align - right`).classList.remove('active');
+                    document.querySelector(`.layout - item[data - id="${columnId}"]`).style.textAlign = 'center';
                     updatePreview();
                     }
 
                     function alignRight(columnId) {
-                    const button = document.querySelector(`.layout-item[data-id="${columnId}"] .bx-align-right`);
+                    const button = document.querySelector(`.layout - item[data - id="${columnId}"] .bx - align - right`);
                     button.classList.add('active');
-                    document.querySelector(`.layout-item[data-id="${columnId}"]
-                    .bx-align-left`).classList.remove('active');
-                    document.querySelector(`.layout-item[data-id="${columnId}"]
-                    .bx-align-middle`).classList.remove('active');
-                    document.querySelector(`.layout-item[data-id="${columnId}"]`).style.textAlign = 'right';
+                    document.querySelector(`.layout - item[data - id="${columnId}"]
+                    .bx - align - left`).classList.remove('active');
+                    document.querySelector(`.layout - item[data - id="${columnId}"]
+                    .bx - align - middle`).classList.remove('active');
+                    document.querySelector(`.layout - item[data - id="${columnId}"]`).style.textAlign = 'right';
                     updatePreview();
                     }
 
@@ -1103,9 +779,10 @@
                     const menu = document.querySelector('.dropdown-menu');
                     menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
                     }
-                    </script>
+        </script>
       </div>
     </div>
   </div>
 </body>
+
 </html>
