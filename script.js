@@ -17,11 +17,11 @@ const appState = {
     groups: groups,
     displayColumnIndex: displayColumnIndex,
     layoutBlocks: layoutBlocks,
-    updateColumns: (newColumns) => { appState.columns = newColumns},
-    updateRows: (newRows) => { appState.rows = newRows},
-    updateGroups: (newGroups) => { appState.groups = newGroups},
-    updateDisplayColumnIndex: (newIndex) => {appState.displayColumnIndex = newIndex; },
-    updateLayoutBlocks: (newLayoutBlocks) => {appState.layoutBlocks = newLayoutBlocks; },
+    updateColumns: (newColumns) => { appState.columns = newColumns; },
+    updateRows: (newRows) => { appState.rows = newRows; },
+    updateGroups: (newGroups) => { appState.groups = newGroups; },
+    updateDisplayColumnIndex: (newIndex) => { appState.displayColumnIndex = newIndex; },
+    updateLayoutBlocks: (newLayoutBlocks) => { appState.layoutBlocks = newLayoutBlocks; },
     renderTable: () => renderTable(appState),
     updatePreview: () => updatePreview(appState),
     updateLayoutItems: () => updateLayoutItems(appState),
@@ -64,10 +64,10 @@ previewButton.addEventListener('click', () => {
     previewMenu.style.display = previewMenu.style.display === 'block' ? 'none' : 'block';
 });
 
-document.getElementById('display-column').addEventListener('change', updatePreview(appState));
+document.getElementById('display-column').addEventListener('change', () => updatePreview(appState));
 
-layoutBuilder.addEventListener('dragover', handleDragOver);
-layoutBuilder.addEventListener('drop', handleDrop);
+layoutBuilder.addEventListener('dragover', (e) => handleDragOver(appState, e));
+layoutBuilder.addEventListener('drop', (e) => handleDrop(appState, e));
 
 document.addEventListener('DOMContentLoaded', () => {
     appState.renderTable();
@@ -82,4 +82,35 @@ document.addEventListener('DOMContentLoaded', () => {
     appState.updateLayoutItems();
     appState.updatePreview();
     appState.updateDisplayColumnOptions();
+
+    document.getElementById('table-body').addEventListener('click', (event) => {
+        let target = event.target;
+        if (target.tagName === 'I') {
+            target = target.parentElement;
+        }
+        if (target.classList.contains('delete-row')) {
+            const rowIndex = parseInt(target.getAttribute('data-row-index'));
+            appState.deleteRow(rowIndex);
+        }
+    });
+
+    document.getElementById('table-header').addEventListener('click', (event) => {
+        let target = event.target;
+        if (target.tagName === 'I') {
+            target = target.parentElement;
+        }
+        if (target.classList.contains('delete-column')) {
+            const colId = parseInt(target.getAttribute('data-column-id'));
+            deleteColumn(appState, colId);
+        }
+    });
+
+    document.getElementById('table-body').addEventListener('input', (event) => {
+        if (event.target.tagName === 'INPUT') {
+            const rowIndex = parseInt(event.target.getAttribute('data-row-index'));
+            const colIndex = parseInt(event.target.getAttribute('data-col-index'));
+            const value = event.target.value;
+            appState.updateCell(rowIndex, colIndex, value);
+        }
+    });
 });

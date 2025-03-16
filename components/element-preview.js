@@ -37,8 +37,8 @@ export function updatePreview(appState) {
         return `
             <div class="dropdown-group">
                 ${groupId !== 'ungrouped' ? `
-                    <div class="group-header">
-                        <input value="${group.name}" onchange="appState.updateGroupName(appState, ${groupId}, this.value)">
+                    <div class="group-header" data-group-id="${groupId}">
+                        <input value="${group.name}" class="group-name-input">
                     </div>
                 ` : ''}
                 ${rows.map(row => {
@@ -54,7 +54,7 @@ export function updatePreview(appState) {
                     }).join('');
 
                     return `
-                        <div class="dropdown-item" onclick="appState.selectItem(appState, '${primaryText}')">
+                        <div class="dropdown-item" data-primary-text="${primaryText}">
                             <div class="item-primary"><b>${primaryText}</b></div>
                             ${secondaryInfo ? `<div class="item-secondary">${secondaryInfo}</div>` : ''}
                         </div>
@@ -75,6 +75,10 @@ export function generateCode(appState) {
     const columns = appState.columns;
     const rows = appState.rows;
     const groups = appState.groups;
+    const layoutBuilder = document.getElementById('layout-builder');
+    const layoutOrder = Array.from(layoutBuilder.children)
+        .filter(child => child.classList.contains('layout-item'))
+        .map(child => parseInt(child.getAttribute('data-id')));
 
     let dropdownHTML = `
         <div class="dropdown-preview">
@@ -94,9 +98,20 @@ export function generateCode(appState) {
                             ` : ''}
                             ${rows.map(row => {
                                 const primaryText = row.values[displayColumnIndex] || '';
+                                const secondaryInfo = layoutOrder.map(colId => {
+                                    const colIndex = appState.columns.findIndex(col => col.id === colId);
+                                    const item = document.querySelector(`.layout-item[data-id="${colId}"]`);
+                                    const bold = item.querySelector('.bx-bold').classList.contains('active') ? 'font-weight: bold;' : '';
+                                    const italic = item.querySelector('.bx-italic').classList.contains('active') ? 'font-style: italic;' : '';
+                                    const underline = item.querySelector('.bx-underline').classList.contains('active') ? 'text-decoration: underline;' : '';
+                                    const textAlign = item.style.textAlign ? `text-align: ${item.style.textAlign};` : '';
+                                    return row.values[colIndex] ? `<div style="${bold} ${italic} ${underline} <span class="math-inline">\{textAlign\}"\></span>{row.values[colIndex]}</div>` : '';
+                                }).join('');
+
                                 return `
-                                    <div class="dropdown-item" onclick="appState.selectItem(appState, '${primaryText}')">
+                                    <div class="dropdown-item">
                                         <div class="item-primary"><b>${primaryText}</b></div>
+                                        ${secondaryInfo ? `<div class="item-secondary">${secondaryInfo}</div>` : ''}
                                     </div>
                                 `;
                             }).join('')}
@@ -130,4 +145,4 @@ function getGroupedRows(rows) {
         groupedRows[groupId].push(row);
     });
     return groupedRows;
-}
+    }

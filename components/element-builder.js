@@ -2,11 +2,23 @@
 
 export function addColumn(appState) {
     const newId = appState.columns.length;
-    appState.updateColumns([...appState.columns, {
+    const newColumn = {
         id: newId,
         name: `Column ${newId + 1}`,
         visible: true
-    }]);
+    };
+    const updatedColumns = [...appState.columns, newColumn];
+    appState.updateColumns(updatedColumns);
+
+    // Update layoutBlocks to match columns
+    appState.layoutBlocks = updatedColumns.map((col, index) => ({
+        id: col.id,
+        x: index * 160,
+        y: 0,
+        width: 150,
+        height: 50
+    }));
+
     appState.renderTable();
     appState.updateDisplayColumnOptions();
     appState.updateLayoutItems();
@@ -24,8 +36,36 @@ export function addGroup(appState) {
     appState.updatePreview();
 }
 
+export function updateColumns(appState, newColumns) {
+    appState.columns = newColumns;
+    const newColumnCount = newColumns.length;
+    const updatedRows = appState.rows.map(row => ({
+        ...row,
+        values: row.values.slice(0, newColumnCount)
+    }));
+    appState.updateRows(updatedRows);
+}
+
 export function deleteColumn(appState, columnId) {
-    appState.updateColumns(appState.columns.filter(col => col.id !== columnId));
+    const updatedColumns = appState.columns.filter(col => col.id !== columnId);
+    appState.updateColumns(updatedColumns);
+
+    const newColumnCount = updatedColumns.length;
+    const updatedRows = appState.rows.map(row => ({
+        ...row,
+        values: row.values.slice(0, newColumnCount)
+    }));
+    appState.updateRows(updatedRows);
+
+    // Update layoutBlocks to match columns
+    appState.layoutBlocks = updatedColumns.map((col, index) => ({
+        id: col.id,
+        x: index * 160,
+        y: 0,
+        width: 150,
+        height: 50
+    }));
+
     appState.renderTable();
     appState.updateDisplayColumnOptions();
     appState.updateLayoutItems();
@@ -56,28 +96,31 @@ export function renderTable(appState) {
             <th>
                 <div class="column-header">
                     <input class="table-input" value="${col.name}" 
-                        onchange="appState.updateColumnName(appState, ${col.id}, this.value)">
-                    <button class="btn" onclick="appState.deleteColumn(appState, ${col.id})" 
+                        data-column-id="${col.id}">
+                    <button class="btn delete-column" data-column-id="${col.id}"
                         style="border: none; background: none; padding: 4px 8px">
                         <i class="bx bx-x"></i>
                     </button>
                 </div>
             </th>
         `).join('')}
-        <th>Group</th><th>Actions</th>`;
+        <th>Group</th><th>Actions</th>
+    `;
 
-        body.innerHTML = appState.rows.map((row, rowIndex) => `
+    body.innerHTML = appState.rows.map((row, rowIndex) => `
         <tr>
             <td>${rowIndex + 1}</td>
             ${appState.columns.map((col, colIndex) => `
                 <td>
                     <input class="table-input" 
                         value="${row.values[colIndex] || ''}" 
-                        onchange="appState.updateCell(appState, ${rowIndex}, ${colIndex}, this.value)">
+                        data-row-index="${rowIndex}"
+                        data-col-index="${colIndex}"
+                        >
                 </td>
             `).join('')}
             <td>
-                <select onchange="appState.updateGroup(appState, ${rowIndex}, this.value)">
+                <select data-row-index="${rowIndex}">
                     <option value="">No Group</option>
                     ${appState.groups.map(group => `
                         <option value="${group.id}" ${row.groupId === group.id ? 'selected' : ''}>
@@ -87,7 +130,7 @@ export function renderTable(appState) {
                 </select>
             </td>
             <td>
-                <button class="btn" onclick="appState.deleteRow(appState, ${rowIndex})" 
+                <button class="btn delete-row" data-row-index="${rowIndex}"
                     style="background: none; border: none; padding: 4px 8px">
                     <i class="bx bx-trash-alt"></i>
                 </button>
@@ -104,7 +147,14 @@ export function updateColumnName(appState, columnId, newName) {
 }
 
 export function updateCell(appState, rowIndex, colIndex, value) {
-    const updatedRows = appState.rows.map((row, index) => index === rowIndex ? { ...row, values: row.values.map((val, i) => i === colIndex ? value : val) } : row);
+    const updatedRows = appState.rows.map((row, index) => {
+        if (index === rowIndex) {
+            const updatedValues = [...row.values];
+            updatedValues[colIndex] = value;
+            return { ...row, values: updatedValues };
+        }
+        return row;
+    });
     appState.updateRows(updatedRows);
     appState.updatePreview();
 }
