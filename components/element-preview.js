@@ -38,13 +38,13 @@ export function updatePreview(appState) {
             <div class="dropdown-group">
                 ${groupId !== 'ungrouped' ? `
                     <div class="group-header">
-                        <input value="${group.name}" onchange="appState.updateGroupName(${groupId}, this.value)">
+                        <input value="${group.name}" onchange="appState.updateGroupName(appState, ${groupId}, this.value)">
                     </div>
                 ` : ''}
                 ${rows.map(row => {
                     const primaryText = row.values[displayColumnIndex] || '';
                     const secondaryInfo = layoutOrder.map(colId => {
-                        const colIndex = columns.findIndex(col => col.id === colId);
+                        const colIndex = appState.columns.findIndex(col => col.id === colId);
                         const item = document.querySelector(`.layout-item[data-id="${colId}"]`);
                         const bold = item.querySelector('.bx-bold').classList.contains('active') ? 'font-weight: bold;' : '';
                         const italic = item.querySelector('.bx-italic').classList.contains('active') ? 'font-style: italic;' : '';
@@ -54,7 +54,7 @@ export function updatePreview(appState) {
                     }).join('');
 
                     return `
-                        <div class="dropdown-item" onclick="selectItem('${primaryText}')">
+                        <div class="dropdown-item" onclick="appState.selectItem(appState, '${primaryText}')">
                             <div class="item-primary"><b>${primaryText}</b></div>
                             ${secondaryInfo ? `<div class="item-secondary">${secondaryInfo}</div>` : ''}
                         </div>
@@ -65,7 +65,7 @@ export function updatePreview(appState) {
     }).join('');
 }
 
-export function selectItem(value) {
+export function selectItem(appState, value) {
     document.getElementById('preview-button').querySelector('span').textContent = value;
     document.getElementById('preview-menu').style.display = 'none';
 }
@@ -95,7 +95,7 @@ export function generateCode(appState) {
                             ${rows.map(row => {
                                 const primaryText = row.values[displayColumnIndex] || '';
                                 return `
-                                    <div class="dropdown-item" onclick="selectItem('${primaryText}')">
+                                    <div class="dropdown-item" onclick="appState.selectItem(appState, '${primaryText}')">
                                         <div class="item-primary"><b>${primaryText}</b></div>
                                     </div>
                                 `;

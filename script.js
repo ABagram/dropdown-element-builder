@@ -17,11 +17,11 @@ const appState = {
     groups: groups,
     displayColumnIndex: displayColumnIndex,
     layoutBlocks: layoutBlocks,
-    updateColumns: (newColumns) => { columns = newColumns; appState.columns = newColumns; },
-    updateRows: (newRows) => { rows = newRows; appState.rows = newRows; },
-    updateGroups: (newGroups) => { groups = newGroups; appState.groups = newGroups; },
-    updateDisplayColumnIndex: (newIndex) => { displayColumnIndex = newIndex; appState.displayColumnIndex = newIndex; },
-    updateLayoutBlocks: (newLayoutBlocks) => { layoutBlocks = newLayoutBlocks; appState.layoutBlocks = newLayoutBlocks; },
+    updateColumns: (newColumns) => { appState.columns = newColumns},
+    updateRows: (newRows) => { appState.rows = newRows},
+    updateGroups: (newGroups) => { appState.groups = newGroups},
+    updateDisplayColumnIndex: (newIndex) => {appState.displayColumnIndex = newIndex; },
+    updateLayoutBlocks: (newLayoutBlocks) => {appState.layoutBlocks = newLayoutBlocks; },
     renderTable: () => renderTable(appState),
     updatePreview: () => updatePreview(appState),
     updateLayoutItems: () => updateLayoutItems(appState),
@@ -64,7 +64,7 @@ previewButton.addEventListener('click', () => {
     previewMenu.style.display = previewMenu.style.display === 'block' ? 'none' : 'block';
 });
 
-document.getElementById('display-column').addEventListener('change', updatePreview);
+document.getElementById('display-column').addEventListener('change', updatePreview(appState));
 
 layoutBuilder.addEventListener('dragover', handleDragOver);
 layoutBuilder.addEventListener('drop', handleDrop);

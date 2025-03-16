@@ -115,12 +115,12 @@ export function updateLayoutItems(appState) {
         layoutItem.innerHTML = `
             <div class="column-name">${appState.columns.find(col => col.id === block.id).name}</div>
             <div class="formatting-buttons">
-                <button class="toggle-formatting" onclick="appState.toggleBold(${block.id})"><i class="bx bx-bold"></i></button>
-                <button class="toggle-formatting" onclick="appState.toggleItalic(${block.id})"><i class="bx bx-italic"></i></button>
-                <button class="toggle-formatting" onclick="appState.toggleUnderline(${block.id})"><i class="bx bx-underline"></i></button>
-                <button class="toggle-formatting" onclick="appState.alignLeft(${block.id})"><i class="bx bx-align-left"></i></button>
-                <button class="toggle-formatting" onclick="appState.alignCenter(${block.id})"><i class="bx bx-align-middle"></i></button>
-                <button class="toggle-formatting" onclick="appState.alignRight(${block.id})"><i class="bx bx-align-right"></i></button>
+                <button class="toggle-formatting" onclick="appState.toggleBold(appState, ${block.id})"><i class="bx bx-bold"></i></button>
+                <button class="toggle-formatting" onclick="appState.toggleItalic(appState, ${block.id})"><i class="bx bx-italic"></i></button>
+                <button class="toggle-formatting" onclick="appState.toggleUnderline(appState, ${block.id})"><i class="bx bx-underline"></i></button>
+                <button class="toggle-formatting" onclick="appState.alignLeft(appState, ${block.id})"><i class="bx bx-align-left"></i></button>
+                <button class="toggle-formatting" onclick="appState.alignCenter(appState, ${block.id})"><i class="bx bx-align-middle"></i></button>
+                <button class="toggle-formatting" onclick="appState.alignRight(appState, ${block.id})"><i class="bx bx-align-right"></i></button>
             </div>
         `;
         layoutBuilder.appendChild(layoutItem);
