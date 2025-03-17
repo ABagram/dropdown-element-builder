@@ -44,6 +44,7 @@ pre[class*=language-] {
 pre[class*=language-]>code {
     position: relative;
     z-index: 1;
+    width: 100vh;
     background-origin: content-box;
     background-attachment: local
 }
