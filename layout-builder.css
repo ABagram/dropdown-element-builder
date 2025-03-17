@@ -1,0 +1,30 @@
+/* layout-builder.css */
+
+#layout-builder {
+    height: 300px; /* Or whatever height you need */
+    border: 1px solid #ccc;
+    position: relative;
+    overflow: auto; /* Allow scrolling if content overflows */
+}
+
+.layout-item {
+    position: absolute;
+    border: 1px solid #000;
+    padding: 5px;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    /* Remove fixed width and height */
+}
+
+.layout-grid {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Make the grid non-interactive */
+}
+
+.layout-grid-cell {
+    position: absolute;
+    border: 1px dashed #ccc;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    /* Remove fixed width and height */
+}

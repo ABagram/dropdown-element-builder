@@ -31,7 +31,6 @@ body {
 
     .layout-item {
       position: relative !important;
-      width: 100% !important;
       margin: 8px 0;
     }
 
@@ -208,7 +207,7 @@ body {
   .item-secondary {
     font-size: 12px;
     color: #64748b;
-    display: flex;
+    display: inline-table;
     gap: 8px;
     flex-wrap: wrap;
   }

@@ -22,17 +22,13 @@ export function runCode(appState) {
 export function updatePreview(appState) {
     const displayColumnIndex = document.getElementById('display-column').value;
     const menu = document.getElementById('preview-menu');
-    const layoutBuilder = document.getElementById('layout-builder');
     const columns = appState.columns;
     const rows = appState.rows;
     const groups = appState.groups;
-    const layoutOrder = Array.from(layoutBuilder.children)
-        .filter(child => child.classList.contains('layout-item'))
-        .map(child => parseInt(child.getAttribute('data-id')));
 
     const groupedRows = getGroupedRows(rows);
 
-    menu.innerHTML = Object.entries(groupedRows).map(([groupId, rows]) => {
+    menu.innerHTML = Object.entries(groupedRows).map(([groupId, rowsInGroup]) => {
         const group = groups.find(g => g.id == groupId) || { name: '' };
         return `
             <div class="dropdown-group">
@@ -41,22 +37,70 @@ export function updatePreview(appState) {
                         <input value="${group.name}" class="group-name-input">
                     </div>
                 ` : ''}
-                ${rows.map(row => {
+                ${rowsInGroup.map(row => {
                     const primaryText = row.values[displayColumnIndex] || '';
-                    const secondaryInfo = layoutOrder.map(colId => {
-                        const colIndex = appState.columns.findIndex(col => col.id === colId);
-                        const item = document.querySelector(`.layout-item[data-id="${colId}"]`);
-                        const bold = item.querySelector('.bx-bold').classList.contains('active') ? 'font-weight: bold;' : '';
-                        const italic = item.querySelector('.bx-italic').classList.contains('active') ? 'font-style: italic;' : '';
-                        const underline = item.querySelector('.bx-underline').classList.contains('active') ? 'text-decoration: underline;' : '';
-                        const textAlign = item.style.textAlign ? `text-align: ${item.style.textAlign};` : '';
-                        return row.values[colIndex] ? `<div style="${bold} ${italic} ${underline} ${textAlign}">${row.values[colIndex]}</div>` : '';
-                    }).join('');
+
+                    // Generate secondary info based on grid layout
+                    const activeCells = {};
+                    appState.layoutBlocks.forEach(block => {
+                        if (block.gridCol !== undefined && block.gridRow !== undefined) {
+                            activeCells[`${block.gridRow}-${block.gridCol}`] = block;
+                        }
+                    });
+
+                    const activeRows = new Set();
+                    const activeCols = new Set();
+                    Object.keys(activeCells).forEach(key => {
+                        const [rowGrid, colGrid] = key.split('-');
+                        activeRows.add(parseInt(rowGrid));
+                        activeCols.add(parseInt(colGrid));
+                    });
+
+                    const minRow = Math.min(...activeRows);
+                    const maxRow = Math.max(...activeRows);
+                    const minCol = Math.min(...activeCols);
+                    const maxCol = Math.max(...activeCols);
+
+                    // Create 2D array to store column data
+                    const gridData = [];
+                    for (let rowGrid = minRow; rowGrid <= maxRow; rowGrid++) {
+                        gridData[rowGrid - minRow] = [];
+                        for (let colGrid = minCol; colGrid <= maxCol; colGrid++) {
+                            gridData[rowGrid - minRow][colGrid - minCol] = '';
+                        }
+                    }
+
+                    // Populate gridData with column data
+                    for (let rowGrid = minRow; rowGrid <= maxRow; rowGrid++) {
+                        for (let colGrid = minCol; colGrid <= maxCol; colGrid++) {
+                            const block = activeCells[`${rowGrid}-${colGrid}`];
+                            if (block) {
+                                const colIndex = appState.columns.findIndex(c => c.id === block.id);
+                                const item = document.querySelector(`.layout-item[data-id="${block.id}"]`);
+                                const bold = item.querySelector('.bx-bold').classList.contains('active') ? 'font-weight: bold;' : '';
+                                const italic = item.querySelector('.bx-italic').classList.contains('active') ? 'font-style: italic;' : '';
+                                const underline = item.querySelector('.bx-underline').classList.contains('active') ? 'text-decoration: underline;' : '';
+                                const textAlign = item.style.textAlign ? `text-align: ${item.style.textAlign};` : '';
+
+                                const rowIndex = rows.findIndex(r => r === row);
+                                gridData[rowGrid - minRow][colGrid - minCol] = `<span style="${bold} ${italic} ${underline} ${textAlign}">${rowsInGroup[rowIndex].values[colIndex]}</span>`;
+                            }
+                        }
+                    }
+
+                    // Generate secondaryInfo string from gridData
+                    let secondaryInfo = `<div style="display: grid; grid-template-columns: repeat(${maxCol - minCol + 1}, 1fr); grid-gap: 5px;">`;
+                    for (let rowGrid = 0; rowGrid < gridData.length; rowGrid++) {
+                        for (let colGrid = 0; colGrid < gridData[rowGrid].length; colGrid++) {
+                            secondaryInfo += `<div>${gridData[rowGrid][colGrid]}</div>`;
+                        }
+                    }
+                    secondaryInfo += `</div>`;
 
                     return `
-                        <div class="dropdown-item" data-primary-text="${primaryText}">
+                        <div class="dropdown-item" data-primary-text="${primaryText}" style="display: grid; grid-template-columns: 1fr; grid-gap: 5px;">
                             <div class="item-primary"><b>${primaryText}</b></div>
-                            ${secondaryInfo ? `<div class="item-secondary">${secondaryInfo}</div>` : ''}
+                            <div class="item-secondary">${secondaryInfo}</div>
                         </div>
                     `;
                 }).join('')}
@@ -76,9 +120,6 @@ export function generateCode(appState) {
     const rows = appState.rows;
     const groups = appState.groups;
     const layoutBuilder = document.getElementById('layout-builder');
-    const layoutOrder = Array.from(layoutBuilder.children)
-        .filter(child => child.classList.contains('layout-item'))
-        .map(child => parseInt(child.getAttribute('data-id')));
 
     let dropdownHTML = `
         <div class="dropdown-preview">
@@ -87,7 +128,7 @@ export function generateCode(appState) {
                 <i class="bx bx-chevron-down"></i>
             </div>
             <div class="dropdown-menu" style="display: none;">
-                ${Object.entries(getGroupedRows(rows)).map(([groupId, rows]) => {
+                ${Object.entries(getGroupedRows(rows)).map(([groupId, rowsInGroup]) => { // Renamed rows to rowsInGroup
                     const group = groups.find(g => g.id == groupId) || { name: '' };
                     return `
                         <div class="dropdown-group">
@@ -96,17 +137,50 @@ export function generateCode(appState) {
                                     ${group.name}
                                 </div>
                             ` : ''}
-                            ${rows.map(row => {
+                            ${rowsInGroup.map(row => { // Use rowsInGroup
                                 const primaryText = row.values[displayColumnIndex] || '';
-                                const secondaryInfo = layoutOrder.map(colId => {
-                                    const colIndex = appState.columns.findIndex(col => col.id === colId);
-                                    const item = document.querySelector(`.layout-item[data-id="${colId}"]`);
-                                    const bold = item.querySelector('.bx-bold').classList.contains('active') ? 'font-weight: bold;' : '';
-                                    const italic = item.querySelector('.bx-italic').classList.contains('active') ? 'font-style: italic;' : '';
-                                    const underline = item.querySelector('.bx-underline').classList.contains('active') ? 'text-decoration: underline;' : '';
-                                    const textAlign = item.style.textAlign ? `text-align: ${item.style.textAlign};` : '';
-                                    return row.values[colIndex] ? `<div style="${bold} ${italic} ${underline} <span class="math-inline">\{textAlign\}"\></span>{row.values[colIndex]}</div>` : '';
-                                }).join('');
+
+                                // Generate secondary info based on grid layout
+                                const activeCells = {};
+                                appState.layoutBlocks.forEach(block => {
+                                    if (block.gridCol !== undefined && block.gridRow !== undefined) {
+                                        activeCells[`${block.gridRow}-${block.gridCol}`] = block;
+                                    }
+                                });
+
+                                const activeRows = new Set();
+                                const activeCols = new Set();
+                                Object.keys(activeCells).forEach(key => {
+                                    const [row, col] = key.split('-');
+                                    activeRows.add(parseInt(row));
+                                    activeCols.add(parseInt(col));
+                                });
+
+                                const minRow = Math.min(...activeRows);
+                                const maxRow = Math.max(...activeRows);
+                                const minCol = Math.min(...activeCols);
+                                const maxCol = Math.max(...activeCols);
+
+                                let secondaryInfo = '';
+                                for (let rowGrid = minRow; rowGrid <= maxRow; rowGrid++) { // Renamed row to rowGrid
+                                    for (let colGrid = minCol; colGrid <= maxCol; colGrid++) { // Renamed col to colGrid
+                                        const block = activeCells[`${rowGrid}-${colGrid}`];
+                                        if (block) {
+                                            const colIndex = appState.columns.findIndex(c => c.id === block.id);
+                                            const item = document.querySelector(`.layout-item[data-id="${block.id}"]`);
+                                            const bold = item.querySelector('.bx-bold').classList.contains('active') ? 'font-weight: bold;' : '';
+                                            const italic = item.querySelector('.bx-italic').classList.contains('active') ? 'font-style: italic;' : '';
+                                            const underline = item.querySelector('.bx-underline').classList.contains('active') ? 'text-decoration: underline;' : '';
+                                            const textAlign = item.style.textAlign ? `text-align: ${item.style.textAlign};` : '';
+                                            secondaryInfo += row.values[colIndex] ? `<div style="${bold} ${italic} ${underline} ${textAlign}">${row.values[colIndex]}</div>` : '';
+                                        } else {
+                                            secondaryInfo += ''; // Empty cell
+                                        }
+                                    }
+                                    if (rowGrid < maxRow) {
+                                        secondaryInfo += '<br>';
+                                    }
+                                }
 
                                 return `
                                     <div class="dropdown-item">
